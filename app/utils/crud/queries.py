@@ -48,9 +48,6 @@ class Queries:
         if "fields" in self.request_query:
             fields = self.request_query["fields"].split(",")
             self.model = self.model.with_entities(*[getattr(self.model.column_descriptions[0]['entity'], field) for field in fields])
-        else:
-            self.model = self.model.with_entities(*[col for col in self.model.column_descriptions[0]['entity'].__table__.columns if col.name != "__v"])
-
         return self
 
     def paginate(self):

@@ -1,8 +1,14 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
-app:FastAPI = FastAPI()
+from app.app import init_app
+
+app, y = init_app()
 
 
-app.get("/hello") 
-async def hello():
-        return {"message": "Hello World!"}
+app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.on_event("startup")
+
+@app.get('/')
+async def root():
+    return {"message":"hello world"}
