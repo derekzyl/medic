@@ -22,7 +22,9 @@ class UserService:
     async  def create_user(self,data:CreateUserT ):
         try:
             d= dict(data)
-            await self.crud_service.create(data=d)
+            user =await self.crud_service.create(data=d)
+            return user
+            
             
         
         except Exception as e:

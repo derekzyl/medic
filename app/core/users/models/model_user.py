@@ -11,8 +11,11 @@ from app.utils.uuid_generator import id_gen
 
 if TYPE_CHECKING:
     from app.core.auth.models.model_token import TokenModel
+    from app.core.notification.models.model_notification import \
+        NotificationModel
 
 
+# This class likely represents a user model with inheritance from Base and TimeStamp classes.
 class UserModel(Base, TimeStamp):
     __tablename__ = "USER"
     id:Mapped[str] = mapped_column(
@@ -23,16 +26,18 @@ class UserModel(Base, TimeStamp):
     password:Mapped[str] =mapped_column(String(255), nullable=False)
     email:Mapped[str]= mapped_column(String(255), unique=True, nullable=False)
     phone:Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    language:Mapped[str]
+    is_email_verified:Mapped[bool] = mapped_column(Boolean, default=False)
+    
     deleted_at:Mapped[DateTime]
     gender:Mapped[str]=mapped_column(Enum(GenderE))
-    user_type:Mapped[str] = mapped_column(Enum(UserTypeE))
+    user_type:Mapped[str] = mapped_column(Enum(UserTypeE), default=UserTypeE.PATIENT)
     allow_login:Mapped[bool] = mapped_column(Boolean, default=True)
-    is_commission_agent:Mapped[bool] = mapped_column(Boolean, default=False)
+  
 
 
     #relationship
    
     user__token:Mapped["TokenModel"] = relationship(back_populates="token__user")
+    user__notification:Mapped["NotificationModel"] = relationship(back_populates="notification__user")
 
 
