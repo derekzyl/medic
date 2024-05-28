@@ -15,6 +15,10 @@ class Mail_Env_Type(TypedDict):
     mail_use_tls:bool
     mail_sender:str
     mail_sender_name:str
+    use_mail_service:bool
+
+    
+    
   
 class JWT_Env_Type(TypedDict):
     jwt_secret: str
@@ -48,6 +52,7 @@ class Settings(BaseSettings):
     mail_sender:str=''
     mail_sender_name:str=""
     env_type: str=''
+    use_mail_service:bool=False
     
 
     
@@ -75,6 +80,8 @@ env:env_type = {"database_url":settings.database_url, "env_type":settings.env_ty
                     "mail_use_ssl":settings.mail_use_ssl,
                     "mail_username":settings.mail_username,
                     "use_credentials":settings.use_credentials,
-                    "mail_sender_name":settings.mail_sender_name
+                    "mail_sender_name":settings.mail_sender_name,
+                    
+                    "use_mail_service": settings.use_mail_service
                     
                 } }

@@ -4,9 +4,9 @@ from fastapi import BackgroundTasks, HTTPException, status
 from fastapi_mail import ConnectionConfig, FastMail, MessageType
 from fastapi_mail.schemas import MessageSchema
 from pydantic import BaseModel, EmailStr
-from utils.template import renderTemplate
 
 from app.config import env
+from app.utils.template import renderTemplate
 
 
 class Mailer:

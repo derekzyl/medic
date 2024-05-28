@@ -57,6 +57,16 @@ class CreateUserT(TypedDict ):
     password: str
 
 
+@dataclass    
+class CreateUserD:
+
+
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+
+
     
 class UpdateUserT(TypedDict ):
     first_name: str

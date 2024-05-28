@@ -21,6 +21,6 @@ def response_message[U](success_status: bool, message: str, error: Any|None=None
         return {
             "success_status": success_status,
             "message": message,
-            "error": error,
+            "error": str(error),
             "doc_length": doc_length
         }

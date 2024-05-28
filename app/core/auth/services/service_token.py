@@ -29,13 +29,14 @@ def generate_otp_token(otp_length:int=6) -> int:
 
 class saveToken(TypedDict):
     token:str
-    expires_in:int
+    expires:int
     type:TokenType
     user_id:str
     blacklisted:bool
  
 
 async def save_token(data:saveToken, db:AsyncSession):
+    data['expires'] = datetime.now() + timedelta(minutes=data['expires']) # type: ignore
     token_data = TokenModel(**data)
     db.add(token_data)
     await db.commit()
@@ -88,7 +89,14 @@ async def verify_otp_token(token:str, user_id:str, type:TokenType, db:AsyncSessi
                 status_code=400,
                                 detail=response_message(error="Invalid token", success_status=False, message="Invalid token")
             )
+
+        if datetime.strptime(token_data.expires,"%Y-%m-%d %H:%M:%S") < datetime.now():
+            raise HTTPException(
+                status_code=400,
+                                detail=response_message(error="Invalid token", success_status=False, message="Invalid token")
+            )   
         return token_data
+    
     except Exception as e:
         raise HTTPException(
             status_code=400,
@@ -98,18 +106,18 @@ async def verify_otp_token(token:str, user_id:str, type:TokenType, db:AsyncSessi
 
 
 
-async def generate_auth_token(user:UserT,db:AsyncSession):
+async def generate_auth_token(user_id:str,db:AsyncSession):
     access_expiry_time = env.env['jwt']['jwt_access_expiry_time']
     refresh_expiry_time = env.env['jwt']['jwt_refresh_expiry_time']
 
-    access_token = MyJwt().create_token(subject=user['id'], token_type=TokenType.ACCESS_TOKEN, expires_in=access_expiry_time)
-    refresh_token = MyJwt().create_token(subject=user['id'], token_type=TokenType.REFRESH_TOKEN, expires_in=refresh_expiry_time)
+    access_token = MyJwt().create_token(subject=user_id, token_type=TokenType.ACCESS_TOKEN.value, expires_in=access_expiry_time)
+    refresh_token = MyJwt().create_token(subject=user_id, token_type=TokenType.REFRESH_TOKEN.value, expires_in=refresh_expiry_time)
 
     await save_token(data={
         "token":refresh_token,
-        "expires_in":access_expiry_time,
+        "expires":access_expiry_time,
         "type":TokenType.REFRESH_TOKEN,
-        "user_id":user['id'],
+        "user_id":user_id,
         "blacklisted":False
     }, db=db)
 
@@ -121,9 +129,11 @@ async def generate_auth_token(user:UserT,db:AsyncSession):
     
 
     
-    
+async def refresh_auth_token(refresh_token:str, db:AsyncSession):
+    get_user =await verify_token(token=refresh_token, type=TokenType.REFRESH_TOKEN, db=db )
+    generate_user_token = await generate_auth_token(user_id=get_user.id, db=db)
+    return generate_user_token
+        
     
 def generate_reset_password_token():
-    pass
-def generate_login_token():
     pass

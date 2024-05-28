@@ -35,7 +35,7 @@ class DatabaseSessionManager:
 
     def init(self, host: str):
         self._engine = create_async_engine(host)
-        self._sessionmaker = async_sessionmaker(autocommit=False, bind=self._engine)
+        self._sessionmaker = async_sessionmaker(bind=self._engine, expire_on_commit=False)
 
     async def close(self):
         if self._engine is None:
@@ -61,14 +61,14 @@ class DatabaseSessionManager:
         if self._sessionmaker is None:
             raise Exception("DatabaseSessionManager is not initialized")
 
-        session = self._sessionmaker()
-        try:
-            yield session
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+        async with self._sessionmaker() as session:
+            try:
+                yield session
+            except Exception:
+                await session.rollback()
+                raise
+            finally:
+                await session.close()
 
     # Used for testing
     async def create_all(self, connection: AsyncConnection):
@@ -77,6 +77,7 @@ class DatabaseSessionManager:
     async def drop_all(self, connection: AsyncConnection):
         await connection.run_sync(Base.metadata.drop_all)
 
+# Example usage
 session_manager = DatabaseSessionManager()
 async def get_db():
     async with session_manager.session() as session:
