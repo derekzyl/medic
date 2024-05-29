@@ -14,7 +14,7 @@ from app.core.users.types.type_user import CreateUserD, CreateUserT
 
 auth_router = APIRouter()
 
-@auth_router.post("/")
+@auth_router.post("/", name="AUTH API", summary="this api end point is responsible for authenticating the user on the platform ")
 async def create_user (data:Annotated[CreateUserT, Body()], db:AsyncSession=Depends(get_db)):
     user = AuthService(db=db)
     create_user = await user.create(data={**data})
